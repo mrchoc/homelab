@@ -140,6 +140,14 @@ data:
             widget:
               type: frigate
               url: http://192.168.1.94:5000
+        - ArgoCD:
+            icon: argo-cd.png
+            href: https://argocd.mrchoc.net
+            siteMonitor: http://192.168.1.244
+            widget:
+              type: argocd
+              url: http://192.168.1.244
+              key: {{HOMEPAGE_VAR_ARGOCD}}
         - Cloudflare:
             icon: cloudflare.png
             href: https://one.dash.cloudflare.com/d955baa102e9818e2f13b215a19618bf/networks/connectors

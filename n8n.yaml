@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: n8n
+  labels:
+    app: n8n
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: n8n
+  template:
+    metadata:
+      labels:
+        app: n8n
+        version: v1
+        app.kubernetes.io/name: n8n
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: k8s-node-1
+      initContainers:
+        - name: volume-permissions
+          image: busybox:1.36
+          command: ["sh", "-c", "chown 1000:1000 /data"]
+          volumeMounts:
+            - name: n8n-data
+              mountPath: /data
+      containers:
+        - name: n8n
+          image: docker.n8n.io/n8nio/n8n:1.121.3
+          command:
+            - /bin/sh
+          args:
+            - -c
+            - sleep 5; n8n start
+          ports:
+            - containerPort: 5678
+          env:
+            - name: N8N_PORT
+              value: "5678"
+            - name: N8N_SECURE_COOKIE
+              value: "false"
+            - name: N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE
+              value: "true"
+          volumeMounts:
+            - name: n8n-data
+              mountPath: "/home/node/.n8n"
+      volumes:
+        - name: n8n-data
+          persistentVolumeClaim:
+            claimName: n8n-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: n8n-pvc
+spec:
+  storageClassName: n8n
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: n8n-pv
+  labels:
+    type: local
+spec:
+  storageClassName: n8n
+  capacity:
+    storage: 50Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/n8n"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: n8n
+  labels:
+    app: n8n
+spec:
+  type: NodePort
+  sessionAffinity: ClientIP
+  externalTrafficPolicy: Local
+  selector:
+    app: n8n
+  ports:
+    - name: admin
+      protocol: TCP
+      port: 5678
+      targetPort: 5678
+      nodePort: 30678

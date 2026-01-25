@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage-docker
+  namespace: default
+  labels:
+    app.kubernetes.io/name: homepage
+data:
+  content: |
+    docker:
+      host: 192.168.1.94
+      port: 2375

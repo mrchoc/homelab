@@ -1,0 +1,93 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: teslamate-db-pv
+  labels:
+    type: local
+spec:
+  storageClassName: teslamate-db
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/teslamate/database"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: teslamate-db-pvc
+  namespace: teslamate
+spec:
+  storageClassName: teslamate-db
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: teslamate-grafana-pv
+  labels:
+    type: local
+spec:
+  storageClassName: teslamate-grafana
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/teslamate/grafana"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: teslamate-grafana-pvc
+  namespace: teslamate
+spec:
+  storageClassName: teslamate-grafana
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mosquitto-pv
+  labels:
+    type: local
+spec:
+  storageClassName: teslamate-mosquitto
+  capacity:
+    storage: 500Mi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/teslamate/mosquitto"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mosquitto-data-pvc
+  namespace: teslamate
+spec:
+  storageClassName: teslamate-mosquitto
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Mi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mosquitto-config
+  namespace: teslamate
+data:
+  mosquitto.conf: |
+    listener 1883
+    allow_anonymous true

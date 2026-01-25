@@ -1,0 +1,134 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: teslamate
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: teslamate
+  namespace: teslamate
+  labels:
+    app: teslamate
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: teslamate
+  template:
+    metadata:
+      labels:
+        app: teslamate
+        version: v1
+        app.kubernetes.io/name: teslamate
+    spec:
+      securityContext:
+        runAsUser: 0
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                - "k8s-node-1"
+      containers:
+        - name: teslamate
+          image: teslamate/teslamate:2.0.0
+          ports:
+            - containerPort: 4000
+          env:
+            - name: DATABASE_HOST
+              value: localhost
+            - name: MQTT_HOST
+              value: localhost
+          envFrom:
+            - secretRef:
+                name: teslamate-secret
+          securityContext:
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: import-volume
+              mountPath: /opt/app/import
+        - name: database
+          image: postgres:17
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: teslamate-secret
+                  key: DATABASE_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: teslamate-secret
+                  key: DATABASE_PASS
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: teslamate-secret
+                  key: DATABASE_NAME
+          volumeMounts:
+            - name: db-data
+              mountPath: /var/lib/postgresql/data
+        - name: grafana
+          image: teslamate/grafana:2.0.0
+          env:
+            - name: DATABASE_HOST
+              value: localhost
+            - name: GF_AUTH_BASIC_ENABLED
+              value: "true"
+          envFrom:
+            - secretRef:
+                name: teslamate-secret
+          ports:
+            - containerPort: 3000
+          volumeMounts:
+            - name: grafana-data
+              mountPath: /var/lib/grafana
+        - name: mosquitto
+          image: eclipse-mosquitto:2
+          command: ["mosquitto", "-c", "/mosquitto/config/mosquitto.conf"]
+          volumeMounts:
+            - name: mosquitto-conf
+              mountPath: /mosquitto/config
+            - name: mosquitto-data
+              mountPath: /mosquitto/data
+          ports:
+            - containerPort: 1883
+        - name: api
+          image: tobiasehlert/teslamateapi:latest
+          env:
+            - name: ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: teslamate-secret
+                  key: API_ENCRYPTION_KEY
+            - name: DATABASE_HOST
+              value: localhost
+            - name: MQTT_HOST
+              value: localhost
+            - name: TZ
+              value: Asia/Singapore
+          envFrom:
+            - secretRef:
+                name: teslamate-secret
+          ports:
+            - containerPort: 8080
+      volumes:
+        - name: import-volume
+          emptyDir: {}
+        - name: db-data
+          persistentVolumeClaim:
+            claimName: teslamate-db-pvc
+        - name: grafana-data
+          persistentVolumeClaim:
+            claimName: teslamate-grafana-pvc
+        - name: mosquitto-data
+          persistentVolumeClaim:
+            claimName: mosquitto-data-pvc
+        - name: mosquitto-conf
+          configMap:
+            name: mosquitto-config

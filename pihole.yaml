@@ -1,0 +1,160 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pihole
+  labels:
+    app: pihole
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: pihole
+  template:
+    metadata:
+      labels:
+        app: pihole
+        version: v1
+        app.kubernetes.io/name: pihole
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-role.kubernetes.io/control-plane
+                operator: DoesNotExist
+      topologySpreadConstraints:
+        - maxSkew: 1
+          whenUnsatisfiable: DoNotSchedule
+          topologyKey: kubernetes.io/hostname
+          nodeTaintsPolicy: Honor
+          labelSelector:
+            matchLabels:
+              app: pihole
+      containers:
+        - name: pihole
+          image: pihole/pihole:2025.06.2
+          ports:
+            - containerPort: 53
+            - containerPort: 53
+              protocol: UDP
+            - containerPort: 80
+            - containerPort: 443
+          env:
+            - name: TZ
+              value: "Asia/Singapore"
+            - name: FTLCONF_webserver_api_password
+              value: "password"
+            - name: FTLCONF_dns_listeningMode
+              value: "all"
+            - name: FTLCONF_dns_hosts
+              value: |
+                192.168.1.95 homepage.mrchoc.net
+                192.168.1.95 immich.mrchoc.net
+                192.168.1.95 pbs.mrchoc.net
+                192.168.1.95 pve-1.mrchoc.net
+                192.168.1.95 pve-2.mrchoc.net
+                192.168.1.95 frigate.mrchoc.net
+                192.168.1.95 pihole-1.mrchoc.net
+                192.168.1.95 pihole-2.mrchoc.net
+          volumeMounts:
+            - name: pihole-data
+              mountPath: "/etc/pihole"
+            - name: pihole-dnsmasq
+              mountPath: /etc/dnsmasq.d/01-pihole.conf
+              subPath: 01-pihole.conf 
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+                - SYS_TIME
+                - SYS_NICE
+      volumes:
+        - name: pihole-data
+          persistentVolumeClaim:
+            claimName: pihole-pvc
+        - name: pihole-dnsmasq
+          configMap:
+            name: pihole-dnsmasq
+      dnsConfig:
+        nameservers:
+          - 1.1.1.1
+          - 127.0.0.1
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pihole-dnsmasq
+data:
+  01-pihole.conf: |
+    address=/home.internal/192.168.1.242
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pihole-pvc
+spec:
+  storageClassName: pihole
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pihole-pv
+  labels:
+    type: local
+spec:
+  storageClassName: pihole
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/pihole"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pihole
+  labels:
+    app: pihole
+spec:
+  type: NodePort
+  sessionAffinity: ClientIP
+  externalTrafficPolicy: Local
+  selector:
+    app: pihole
+  ports:
+    - name: admin-page
+      protocol: TCP
+      port: 443
+      targetPort: 443
+      nodePort: 30443
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pihole-lb
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  loadBalancerIP: 192.168.1.240
+  selector:
+    app: pihole
+  ports:
+    - name: https
+      port: 443
+      targetPort: 443
+      protocol: TCP
+    - name: dns
+      port: 53
+      targetPort: 53
+      protocol: UDP
+    - name: dns-tcp
+      port: 53
+      targetPort: 53
+      protocol: TCP

@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage-bookmarks
+  namespace: default
+  labels:
+    app.kubernetes.io/name: homepage
+data:
+  content: |
+    - Bookmarks:
+        - Homepage:
+            - icon: homepage.png
+              href: https://gethomepage.dev/configs/
+        - Proxmox VE Scripts:
+            - icon: proxmox.png
+              href: https://community-scripts.github.io/ProxmoxVE/scripts
+        - Tailscale Console:
+            - icon: tailscale-light.png
+              href: https://login.tailscale.com/admin/machines
+        - Dashboard Icons:
+            - icon: homarr.png
+              href: https://dashboardicons.com/
+        - MusicBrainz:
+            - icon: musicbrainz.png
+              href: https://musicbrainz.org/
+        - NanoKVM:
+            - icon: sipeed.png
+              href: https://usbkvm.sipeed.com/

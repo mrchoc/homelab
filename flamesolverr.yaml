@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flamesolverr
+  labels:
+    app: flamesolverr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flamesolverr
+  template:
+    metadata:
+      labels:
+        app: flamesolverr
+        version: v1
+        app.kubernetes.io/name: flamesolverr
+    spec:
+      containers:
+        - name: flamesolverr
+          image: ghcr.io/flaresolverr/flaresolverr:latest 
+          ports:
+            - containerPort: 8191
+          env:
+            - name: TZ
+              value: "Asia/Singapore"
+            - name: LOG_LEVEL
+              value: "info"
+            - name: LOG_HTML
+              value: "false"
+            - name: CAPTCHA_SOLVER
+              value: "none"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flamesolverr
+  labels:
+    app: flamesolverr
+spec:
+  type: ClusterIP
+  selector:
+    app: flamesolverr
+  ports:
+    - name: tcp
+      protocol: TCP
+      targetPort: 8191
+      port: 8191
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: flamesolverr
+  namespace: default
+  labels:
+    app.kubernetes.io/name: flamesolverr
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: flamesolverr
+                port:
+                  number: 8191

@@ -1,0 +1,320 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage-services
+  namespace: default
+  labels:
+    app.kubernetes.io/name: homepage
+data:
+  content: |
+    - Infrastructure:
+        - PVE-1:
+            icon: proxmox.png
+            href: https://pve-1.mrchoc.net
+            ping: 192.168.1.200
+            widget:
+              type: proxmox
+              url: https://192.168.1.200:8006
+              username: api@pam!homepage
+              password: {{HOMEPAGE_VAR_PROXMOX_PASSWORD}}
+              node: pve-1
+        - PVE-2:
+            icon: proxmox.png
+            href: https://pve-2.mrchoc.net
+            ping: 192.168.1.201
+            widget:
+              type: proxmox
+              url: https://192.168.1.200:8006
+              username: api@pam!homepage
+              password: {{HOMEPAGE_VAR_PROXMOX_PASSWORD}}
+              node: pve-2
+        - Truenas:
+            icon: truenas-scale.png
+            href: http://192.168.1.66
+            ping: http://192.168.1.66
+            widget:
+              type: truenas
+              url: http://192.168.1.66
+              key: {{HOMEPAGE_VAR_TRUENAS_KEY}}
+              enablePools: true # optional, defaults to false
+              nasType: scale # defaults to scale, must be set to 'core' if using enablePools with TrueNAS Core
+        - PBS:
+            icon: proxmox.png
+            href: https://pbs.mrchoc.net
+            ping: https://192.168.1.68:8007
+            widget:
+              type: proxmoxbackupserver
+              url: https://192.168.1.68:8007
+              username: root@pam!homepage
+              password: {{HOMEPAGE_VAR_PBS_PASSWORD}}
+              datastore: backups #optional; if ommitted, will display a combination of all datastores used / total
+    - Services:
+        - Pi Hole 1:
+            icon: pi-hole.png
+            href: https://pihole-1.mrchoc.net/admin
+            namespace: default
+            app: pihole
+            widget:
+              type: pihole
+              url: https://192.168.1.44:30443
+              version: 6 # required if running v6 or higher, defaults to 5
+              key: password # optional, in v6 can be your password or app password
+        - Pi Hole 2:
+            icon: pi-hole.png
+            href: https://pihole-2.mrchoc.net/admin
+            namespace: default
+            app: pihole
+            widget:
+              type: pihole
+              url: https://192.168.1.45:30443
+              version: 6 # required if running v6 or higher, defaults to 5
+              key: password
+        - Home Assistant:
+            icon: home-assistant.png
+            href: https://hass.mrchoc.net
+            ping: http://192.168.1.60
+            widget:
+              type: customapi
+              url: http://192.168.1.60:8123/api/states/switch.wifi_plug_wifi_plug
+              method: GET
+              headers: 
+                Authorization: Bearer {{HOMEPAGE_VAR_HOMEASSISTANT_TOKEN}}
+              mappings:
+                - field: attributes.current
+                  label: "Current"
+                  suffix: mA
+                - field: attributes.current_consumption
+                  label: "Power"
+                  suffix: W
+                - field: attributes.voltage
+                  label: "Voltage"
+                  suffix: V
+        - Nginx Proxy Manager:
+            icon: nginx-proxy-manager.png
+            href: http://192.168.1.95:81
+            ping: 192.168.1.95
+            widget:
+              type: npm
+              url: http://192.168.1.95:81
+              username: ryanloh28@yahoo.com.sg
+              password: {{HOMEPAGE_VAR_DEFAULT_PASSWORD}}
+        - Minecraft:
+            icon: minecraft.png
+            widget:
+              type: minecraft
+              url: udp://192.168.1.64
+        - TeslaMate:
+            icon: teslamate.png
+            href: http://192.168.1.243:4000
+            siteMonitor: http://192.168.1.243:4000
+            widgets:
+              - type: customapi
+                url: http://192.168.1.243:8080/api/v1/cars/1/status
+                method: GET
+                mappings:
+                  - field: data.status.state
+                    label: "State"
+                    format: text
+                  - field: data.status.car_geodata.geofence
+                    label: "Location"
+                    format: text
+                  - field: data.status.battery_details.battery_level
+                    label: "Battery"
+                    format: percent
+        - TeslaMate Grafana:
+            icon: grafana.png
+            href: http://192.168.1.243:3000
+            siteMonitor: http://192.168.1.243:3000
+            widget:
+              type: grafana
+              alerts: grafana
+              fields: ["dashboards", "totalalerts", "alertstriggered"]
+              url: http://192.168.1.243:3000
+              username: admin
+              password: password
+        - Frigate:
+            icon: frigate.png
+            href: https://frigate.mrchoc.net
+            server: docker
+            container: frigate
+            widget:
+              type: frigate
+              url: http://192.168.1.94:5000
+        - Cloudflare:
+            icon: cloudflare.png
+            href: https://one.dash.cloudflare.com/d955baa102e9818e2f13b215a19618bf/networks/connectors
+            widget:
+              type: cloudflared
+              accountid: {{HOMEPAGE_VAR_CLOUDFLARE_ACCOUNTID}} # from zero trust dashboard url e.g. https://one.dash.cloudflare.com/<accountid>/home/quick-start
+              tunnelid: {{HOMEPAGE_VAR_CLOUDFLARE_TUNNELID}} # found in tunnels dashboard under the tunnel name
+              key: {{HOMEPAGE_VAR_CLOUDFLARE_KEY}} # api token with `Account.Cloudflare Tunnel:Read` https://dash.cloudflare.com/profile/api-tokens
+              fields: ["status"]
+        - n8n:
+            icon: n8n.png
+            href: http://192.168.1.44:30678
+            siteMonitor: http://192.168.1.44:30678
+            widget:
+              type: customapi
+              url: http://192.168.1.44:30678/api/v1/workflows?active=true
+              headers:
+                X-N8N-API-KEY: {{HOMEPAGE_VAR_N8N_KEY}}
+              mappings:
+                - field: data
+                  label: Active Workflows
+                  format: size
+    - Media:
+        - Jellyfin:
+            icon: jellyfin.png
+            href: http://192.168.1.53:8096
+            ping: 192.168.1.53
+            widget:
+              type: jellyfin
+              url: http://192.168.1.53:8096
+              key: {{HOMEPAGE_VAR_JELLYFIN}}
+              enableBlocks: true # optional, defaults to false
+              enableNowPlaying: true # optional, defaults to true
+              enableUser: true # optional, defaults to false
+              enableMediaControl: false # optional, defaults to true
+              showEpisodeNumber: true # optional, defaults to false
+              expandOneStreamToTwoRows: false # optional, defaults to true
+        - Jellyseerr:
+            icon: jellyseerr.png
+            href: http://192.168.1.61:5055
+            ping: 192.168.1.61
+            widget:
+              type: jellyseerr
+              url: http://192.168.1.61:5055
+              key: {{HOMEPAGE_VAR_JELLYSEER}}
+        - qBittorrent:
+            icon: qbittorrent.png
+            href: http://192.168.1.43:8090/
+            ping: 192.168.1.43
+            widget:
+              type: qbittorrent
+              url: http://192.168.1.43:8090
+              username: admin
+              password: {{HOMEPAGE_VAR_DEFAULT_PASSWORD}}
+              enableLeechProgress: true # optional, defaults to false
+        - Immich:
+            icon: immich.png
+            href: https://immich.mrchoc.net
+            ping: 192.168.1.90
+            widget:
+              type: immich
+              url: http://192.168.1.90:2283
+              key: {{HOMEPAGE_VAR_IMMICH_KEY}}
+              version: 2
+        - Radarr:
+            icon: radarr.png
+            href: http://192.168.1.4:7878
+            ping: 192.168.1.4
+            widget:
+              type: radarr
+              url: http://192.168.1.4:7878 
+              key: {{HOMEPAGE_VAR_RADARR}}
+        - Sonarr:
+            icon: sonarr.png
+            href: http://192.168.1.63:8989
+            ping: 192.168.1.63
+            widget:
+              type: sonarr
+              url: http://192.168.1.63:8989 
+              key: {{HOMEPAGE_VAR_SONARR}}
+        - Lidarr:
+            icon: lidarr.png
+            href: http://192.168.1.76:8686
+            ping: 192.168.1.76
+            widget:
+              type: lidarr
+              url: http://192.168.1.76:8686
+              key: {{HOMEPAGE_VAR_LIDARR}}
+        - Prowlarr:
+            icon: prowlarr.png
+            href: http://192.168.1.58:9696
+            ping: 192.168.1.58
+            widget:
+              type: prowlarr
+              url: http://192.168.1.58:9696 
+              key: {{HOMEPAGE_VAR_PROWLARR}}
+        - Bazarr:
+            icon: bazarr.png
+            href: http://192.168.1.79:6767
+            ping: 192.168.1.79
+            widget:
+              type: bazarr
+              url: http://192.168.1.79:6767
+              key: {{HOMEPAGE_VAR_BAZARR}}
+        - FileFlows:
+            icon: fileflows.png
+            href: http://192.168.1.84:19200
+            ping: 192.168.1.84
+            widget:
+              type: fileflows
+              url: http://192.168.1.84:19200 
+    - System Info:
+        - pve-1:
+            - CPU:
+                widget:
+                  type: glances
+                  version: 4
+                  url: http://192.168.1.200:61208
+                  metric: cpu
+                  username: glances
+                  password:
+            - Memory:
+                widget:
+                  type: glances
+                  version: 4
+                  url: http://192.168.1.200:61208
+                  metric: memory
+                  username: glances
+                  password:
+            - Network:
+                widget:
+                  type: glances
+                  version: 4
+                  url: http://192.168.1.200:61208
+                  metric: network:vmbr0
+                  username: glances
+                  password:
+            - Disk:
+                widget:
+                  type: glances
+                  version: 4
+                  url: http://192.168.1.200:61208
+                  metric: fs:/
+                  username: glances
+                  password:
+        - pve-2:
+            - CPU:
+                widget:
+                  type: glances
+                  version: 4
+                  url: http://192.168.1.201:61208
+                  metric: cpu
+                  username: glances
+                  password:
+            - Memory:
+                widget:
+                  type: glances
+                  version: 4
+                  url: http://192.168.1.201:61208
+                  metric: memory
+                  username: glances
+                  password:
+            - Network:
+                widget:
+                  type: glances
+                  version: 4
+                  url: http://192.168.1.201:61208
+                  metric: network:vmbr0
+                  username: glances
+                  password:
+            - Disk:
+                widget:
+                  type: glances
+                  version: 4
+                  url: http://192.168.1.201:61208
+                  metric: fs:/
+                  username: glances
+                  password:

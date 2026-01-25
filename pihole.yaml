@@ -57,6 +57,7 @@ spec:
                 192.168.1.95 frigate.mrchoc.net
                 192.168.1.95 pihole-1.mrchoc.net
                 192.168.1.95 pihole-2.mrchoc.net
+                192.168.1.95 argocd.mrchoc.net
           volumeMounts:
             - name: pihole-data
               mountPath: "/etc/pihole"

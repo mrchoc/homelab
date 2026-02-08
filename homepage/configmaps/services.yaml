@@ -74,21 +74,9 @@ data:
             href: https://hass.mrchoc.net
             ping: http://192.168.1.60
             widget:
-              type: customapi
-              url: http://192.168.1.60:8123/api/states/switch.wifi_plug_wifi_plug
-              method: GET
-              headers: 
-                Authorization: Bearer {{HOMEPAGE_VAR_HOMEASSISTANT_TOKEN}}
-              mappings:
-                - field: attributes.current
-                  label: "Current"
-                  suffix: mA
-                - field: attributes.current_consumption
-                  label: "Power"
-                  suffix: W
-                - field: attributes.voltage
-                  label: "Voltage"
-                  suffix: V
+              type: homeassistant
+              url: http://192.168.1.60:8123
+              key: {{HOMEPAGE_VAR_HOMEASSISTANT_TOKEN}}
         - Nginx Proxy Manager:
             icon: nginx-proxy-manager.png
             href: http://192.168.1.95:81

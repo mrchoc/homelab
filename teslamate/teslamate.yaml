@@ -35,7 +35,7 @@ spec:
                 - "k8s-node-1"
       containers:
         - name: teslamate
-          image: teslamate/teslamate:2.0.0
+          image: teslamate/teslamate:3.0.0
           ports:
             - containerPort: 4000
           env:
@@ -74,7 +74,7 @@ spec:
             - name: db-data
               mountPath: /var/lib/postgresql/data
         - name: grafana
-          image: teslamate/grafana:2.0.0
+          image: teslamate/grafana:3.0.0
           env:
             - name: DATABASE_HOST
               value: localhost

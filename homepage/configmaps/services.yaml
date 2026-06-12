@@ -169,6 +169,11 @@ data:
             icon: termix.png
             href: http://192.168.1.99
             siteMonitor: http://192.168.1.99
+        - Hermes:
+            icon: hermes-agent.png
+            href: http://192.168.1.103:3000
+            siteMonitor: http://192.168.1.103:3000
+
 
     - Media:
         - Jellyfin:

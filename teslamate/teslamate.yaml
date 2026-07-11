@@ -35,7 +35,7 @@ spec:
                 - "k8s-node-1"
       containers:
         - name: teslamate
-          image: ghcr.io/teslamate-org/teslamate:pr-5406
+          image: teslamate/teslamate:4.0.1
           ports:
             - containerPort: 4000
           env:

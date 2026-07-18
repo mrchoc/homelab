@@ -48,13 +48,6 @@ data:
               username: root@pam!homepage
               password: {{HOMEPAGE_VAR_PBS_PASSWORD}}
               datastore: backups #optional; if ommitted, will display a combination of all datastores used / total
-        - Uptime Kuma:
-            icon: uptime-kuma.png
-            href: http://192.168.1.122:3001
-            widget:
-              type: uptimekuma
-              url: http://192.168.1.122:3001
-              slug: chocloud
     - Services:
         - Pi Hole 1:
             icon: pi-hole.png
@@ -173,6 +166,13 @@ data:
             icon: hermes-icon.png
             href: http://192.168.1.103:3000
             siteMonitor: http://192.168.1.103:3000
+        - Gitea:
+            icon: gitea.png
+            href: https://gitea.mrchoc.net
+            widget:
+              type: gitea
+              url: https://gitea.mrchoc.net
+              key: {{HOMEPAGE_VAR_GITEA}}
 
 
     - Media:

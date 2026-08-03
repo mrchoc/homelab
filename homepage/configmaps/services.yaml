@@ -282,12 +282,12 @@ data:
                   metric: memory
                   username: glances
                   password:
-            - Network:
+            - CPU Temp:
                 widget:
                   type: glances
                   version: 4
                   url: http://192.168.1.200:61208
-                  metric: network:vmbr0
+                  metric: sensor:Package id 0
                   username: glances
                   password:
             - Disk:
@@ -315,12 +315,12 @@ data:
                   metric: memory
                   username: glances
                   password:
-            - Network:
+            - CPU Temp:
                 widget:
                   type: glances
                   version: 4
                   url: http://192.168.1.201:61208
-                  metric: network:vmbr0
+                  metric: sensor:Package id 0
                   username: glances
                   password:
             - Disk:

@@ -163,7 +163,7 @@ data:
             href: http://192.168.1.99
             siteMonitor: http://192.168.1.99
         - Hermes:
-            icon: hermes-icon.png
+            icon: hermes.png
             href: http://192.168.1.103:3000
             siteMonitor: http://192.168.1.103:3000
         - Gitea:

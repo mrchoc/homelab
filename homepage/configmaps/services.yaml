@@ -49,26 +49,15 @@ data:
               password: {{HOMEPAGE_VAR_PBS_PASSWORD}}
               datastore: backups #optional; if ommitted, will display a combination of all datastores used / total
     - Services:
-        - Pi Hole 1:
+        - Pi Hole:
             icon: pi-hole.png
-            href: https://pihole-1.mrchoc.net/admin
-            namespace: default
-            app: pihole
+            href: http://192.168.1.139
+            ping: http://192.168.1.139
             widget:
               type: pihole
-              url: https://192.168.1.44:30443
+              url: https://192.168.1.139
               version: 6 # required if running v6 or higher, defaults to 5
               key: password # optional, in v6 can be your password or app password
-        - Pi Hole 2:
-            icon: pi-hole.png
-            href: https://pihole-2.mrchoc.net/admin
-            namespace: default
-            app: pihole
-            widget:
-              type: pihole
-              url: https://192.168.1.45:30443
-              version: 6 # required if running v6 or higher, defaults to 5
-              key: password
         - Home Assistant:
             icon: home-assistant.png
             href: https://hass.mrchoc.net

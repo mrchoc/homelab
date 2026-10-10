@@ -173,6 +173,7 @@ data:
               type: jellyfin
               url: http://192.168.1.53:8096
               key: {{HOMEPAGE_VAR_JELLYFIN}}
+              version: 2
               enableBlocks: true # optional, defaults to false
               enableNowPlaying: true # optional, defaults to true
               enableUser: true # optional, defaults to false
